@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.micandmaster.audio.Audio;
 import com.example.micandmaster.db.AudioViewModel;
 
 import java.util.List;
@@ -58,5 +59,10 @@ public class LoadExistingActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, EditorActivity.class);
         intent.putExtra(MainActivity.AUDIO_NAME, this.current_selection);
         startActivity(intent);
+    }
+    public void deleteButtonClick(View view){
+        Audio audio = new Audio(this.current_selection);
+        audio.generatePath(this);
+        audio.deleteAudio(getApplication());
     }
 }

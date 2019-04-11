@@ -24,6 +24,11 @@ public class AudioViewModel extends AndroidViewModel {
         this.repository.insertAudio(audioEntity);
     }
 
+    public void deleteAudio(Audio audio){
+        AudioEntity audioEntity = new AudioEntity(audio.name, audio.path);
+        this.repository.deleteAudio(audioEntity);
+    }
+
     public MutableLiveData<AudioEntity> findAudio(String name) {
         this.repository.getAudioFromName(name);
         return this.repository.searchByNameResult;

@@ -10,4 +10,5 @@
     <string name="play">Play</string>
     <string name="title_activity_editor">EditorActivity</string>
     <string name="Load_button">Load Project</string>
+    <string name="delete_button">Delete Project</string>
 </resources>

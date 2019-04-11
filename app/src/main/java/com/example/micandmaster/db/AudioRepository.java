@@ -28,6 +28,11 @@ public class AudioRepository {
         asyncTask.execute();
     }
 
+    public void deleteAudio(AudioEntity audio){
+        DeleteAsyncTask asyncTask = new DeleteAsyncTask(audio, this.audioDao);
+        asyncTask.execute();
+    }
+
     public void getAudioFromName(String name){
         GetByNameAsyncTask asyncTask = new GetByNameAsyncTask(name, this.audioDao, this);
         asyncTask.execute();
@@ -54,6 +59,23 @@ public class AudioRepository {
         @Override
         protected Integer doInBackground(Void... params) {
             this.audioDao.insertAudio(this.audioEntity);
+            return null;
+        }
+    }
+
+    private static class DeleteAsyncTask extends AsyncTask<Void, Void, Integer> {
+
+        private AudioDao audioDao;
+        private AudioEntity audioEntity;
+
+        public DeleteAsyncTask(AudioEntity audio, AudioDao audioDao) {
+            this.audioDao = audioDao;
+            this.audioEntity = audio;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            this.audioDao.deleteAudio(this.audioEntity);
             return null;
         }
     }
