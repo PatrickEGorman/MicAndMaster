@@ -1,8 +1,12 @@
 package com.example.micandmaster;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -10,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
+                    0);
+
+        }
     }
 
     @Override
@@ -48,5 +59,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void newRecordingClick(View view){
+        Intent recordingActivity = new Intent(this, RecordActivity.class);
+        startActivity(recordingActivity);
+    }
+
+    public void loadExistingClick(View view){
+        Intent recordingActivity = new Intent(this, RecordActivity.class);
+    }
+
+    public void importAudioClick(View view){
+        Intent recordingActivity = new Intent(this, RecordActivity.class);
     }
 }
