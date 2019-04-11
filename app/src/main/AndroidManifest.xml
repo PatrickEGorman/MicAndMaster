@@ -11,10 +11,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".LoadExistingActivity"></activity>
         <activity
             android:name=".EditorActivity"
             android:label="@string/title_activity_editor"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".RecordActivity"
             android:label="@string/title_activity_record"

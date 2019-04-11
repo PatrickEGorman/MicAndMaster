@@ -1,11 +1,14 @@
 package com.example.micandmaster.db;
 
 import android.app.Application;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+
+import java.util.List;
 
 
 public class AudioRepository {
@@ -28,6 +31,10 @@ public class AudioRepository {
     public void getAudioFromName(String name){
         GetByNameAsyncTask asyncTask = new GetByNameAsyncTask(name, this.audioDao, this);
         asyncTask.execute();
+    }
+
+    public LiveData<List<String>> getAudioNames(){
+        return audioDao.getAudioNames();
     }
 
     private void asyncNameFinished(AudioEntity results) {

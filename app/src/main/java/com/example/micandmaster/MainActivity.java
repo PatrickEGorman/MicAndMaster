@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadExistingClick(View view){
-        Intent recordingActivity = new Intent(this, RecordActivity.class);
+        Intent recordingActivity = new Intent(this, LoadExistingActivity.class);
+        startActivity(recordingActivity);
     }
 
     public void importAudioClick(View view){
