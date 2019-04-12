@@ -11,14 +11,14 @@ public class AudioEntity {
 
     @PrimaryKey
     @NonNull
-    @ColumnInfo(name="name")
+    @ColumnInfo(name = "name")
     public String name;
 
-    @ColumnInfo(name="path")
+    @ColumnInfo(name = "path")
     @NonNull
     public String path;
 
-    public AudioEntity(@NonNull String name, @NonNull String path){
+    public AudioEntity(@NonNull String name, @NonNull String path) {
         this.name = name;
         this.path = path;
     }

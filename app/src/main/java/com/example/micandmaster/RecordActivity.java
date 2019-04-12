@@ -1,16 +1,10 @@
 package com.example.micandmaster;
 
-import android.Manifest;
-import android.arch.lifecycle.LiveData;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -21,18 +15,14 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.example.micandmaster.Util.FileUtilities;
 import com.example.micandmaster.audio.Audio;
-import com.example.micandmaster.db.AudioDatabase;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
 
 public class RecordActivity extends AppCompatActivity {
 
@@ -53,13 +43,13 @@ public class RecordActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
         this.file = new File(path + "audio.aac");
-        this.myChronometer = (Chronometer)findViewById(R.id.chronometer);
+        this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
     }
 
-    public void recordClick(View view){
-        String curText = (String) ((TextView)view).getText();
+    public void recordClick(View view) {
+        String curText = (String) ((TextView) view).getText();
 
-        if(curText.equals("New Recording")){
+        if (curText.equals("New Recording")) {
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
@@ -67,9 +57,8 @@ public class RecordActivity extends AppCompatActivity {
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             try {
                 mediaRecorder.prepare();
-                ((TextView)view).setText("Stop");
-            }
-            catch(IOException E){
+                ((TextView) view).setText("Stop");
+            } catch (IOException E) {
                 E.printStackTrace();
             }
             myChronometer.setBase(SystemClock.elapsedRealtime());
@@ -77,8 +66,8 @@ public class RecordActivity extends AppCompatActivity {
             mediaRecorder.start();
         }
 
-        if(curText.equals("Stop")){
-            ((TextView)view).setText("New Recording");
+        if (curText.equals("Stop")) {
+            ((TextView) view).setText("New Recording");
             myChronometer.stop();
             mediaRecorder.stop();
             Button playButton = (Button) findViewById(R.id.play);
@@ -88,7 +77,7 @@ public class RecordActivity extends AppCompatActivity {
         }
     }
 
-    public void playClick(View view){
+    public void playClick(View view) {
         mediaPlayer = new MediaPlayer();
         try {
             myChronometer.setBase(SystemClock.elapsedRealtime());
@@ -96,14 +85,13 @@ public class RecordActivity extends AppCompatActivity {
             mediaPlayer.prepare();
             mediaPlayer.start();
             myChronometer.start();
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
-                public  void onCompletion(MediaPlayer mediaPlayer){
+                public void onCompletion(MediaPlayer mediaPlayer) {
                     stopChronometer();
                 }
             });
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -112,7 +100,7 @@ public class RecordActivity extends AppCompatActivity {
         this.myChronometer.stop();
     }
 
-    public void saveClick(View view){
+    public void saveClick(View view) {
         this.inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         this.popupView = this.inflater.inflate(R.layout.save_as_window, null);
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -122,13 +110,13 @@ public class RecordActivity extends AppCompatActivity {
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
     }
 
-    public void savePopupClick(View view){
+    public void savePopupClick(View view) {
         View layout = RecordActivity.this.inflater.inflate(R.layout.activity_record,
                 (ViewGroup) this.findViewById(R.id.save_as_window));
         EditText nameInput = (EditText) this.popupView.findViewById(R.id.name_input);
         String name = nameInput.getText().toString();
         Boolean isUnique = Audio.checkNameUnique(name, this);
-        if(isUnique){
+        if (isUnique) {
             Audio audio = new Audio(name);
             audio.generatePath(this);
             File audioSaved = new File(audio.path);
@@ -138,8 +126,7 @@ public class RecordActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, EditorActivity.class);
                 intent.putExtra(AUDIO_NAME, audio.name);
                 startActivity(intent);
-            }
-            catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

@@ -22,7 +22,6 @@ public class EditorActivity extends AppCompatActivity {
     Chronometer myChronometer;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,21 +31,21 @@ public class EditorActivity extends AppCompatActivity {
         String audioName = getIntent().getStringExtra(MainActivity.AUDIO_NAME);
         AudioViewModel model = new AudioViewModel(getApplication());
         MutableLiveData<AudioEntity> audioLiveData = model.findAudio(audioName);
-        this.myChronometer = (Chronometer)findViewById(R.id.chronometer);
-        audioLiveData.observe(this, new Observer<AudioEntity>(){
+        this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
+        audioLiveData.observe(this, new Observer<AudioEntity>() {
             @Override
-            public void onChanged(AudioEntity audioEntity){
+            public void onChanged(AudioEntity audioEntity) {
                 Audio audio = new Audio(audioEntity.getName(), audioEntity.getPath());
                 setAudio(audio);
             }
         });
     }
 
-    public void setAudio(Audio audio){
+    public void setAudio(Audio audio) {
         this.audio = audio;
     }
 
-    public void playClick(View view){
+    public void playClick(View view) {
         mediaPlayer = new MediaPlayer();
         try {
             myChronometer.setBase(SystemClock.elapsedRealtime());
@@ -54,19 +53,18 @@ public class EditorActivity extends AppCompatActivity {
             mediaPlayer.prepare();
             mediaPlayer.start();
             myChronometer.start();
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
-                public  void onCompletion(MediaPlayer mediaPlayer){
+                public void onCompletion(MediaPlayer mediaPlayer) {
                     stopChronometer();
                 }
             });
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void stopChronometer(){
+    public void stopChronometer() {
         myChronometer.stop();
     }
 

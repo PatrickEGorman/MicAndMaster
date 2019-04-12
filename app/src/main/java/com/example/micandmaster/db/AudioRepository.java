@@ -3,10 +3,7 @@ package com.example.micandmaster.db;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 
 import java.util.List;
 
@@ -23,22 +20,22 @@ public class AudioRepository {
         audioDao = db.audioDao();
     }
 
-    public void insertAudio(AudioEntity audio){
+    public void insertAudio(AudioEntity audio) {
         InsertAsyncTask asyncTask = new InsertAsyncTask(audio, this.audioDao);
         asyncTask.execute();
     }
 
-    public void deleteAudio(AudioEntity audio){
+    public void deleteAudio(AudioEntity audio) {
         DeleteAsyncTask asyncTask = new DeleteAsyncTask(audio, this.audioDao);
         asyncTask.execute();
     }
 
-    public void getAudioFromName(String name){
+    public void getAudioFromName(String name) {
         GetByNameAsyncTask asyncTask = new GetByNameAsyncTask(name, this.audioDao, this);
         asyncTask.execute();
     }
 
-    public LiveData<List<String>> getAudioNames(){
+    public LiveData<List<String>> getAudioNames() {
         return audioDao.getAudioNames();
     }
 

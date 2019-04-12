@@ -14,17 +14,18 @@ public class AudioViewModel extends AndroidViewModel {
     private MutableLiveData<String> searchResults;
     public LiveData<List<String>> names;
 
-    public AudioViewModel (Application application) {
+    public AudioViewModel(Application application) {
         super(application);
         this.repository = new AudioRepository(application);
         this.names = repository.getAudioNames();
     }
-    public void insertAudio(Audio audio){
+
+    public void insertAudio(Audio audio) {
         AudioEntity audioEntity = new AudioEntity(audio.name, audio.path);
         this.repository.insertAudio(audioEntity);
     }
 
-    public void deleteAudio(Audio audio){
+    public void deleteAudio(Audio audio) {
         AudioEntity audioEntity = new AudioEntity(audio.name, audio.path);
         this.repository.deleteAudio(audioEntity);
     }

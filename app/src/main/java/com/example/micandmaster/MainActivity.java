@@ -9,9 +9,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
     public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
@@ -61,17 +61,17 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void newRecordingClick(View view){
+    public void newRecordingClick(View view) {
         Intent recordingActivity = new Intent(this, RecordActivity.class);
         startActivity(recordingActivity);
     }
 
-    public void loadExistingClick(View view){
+    public void loadExistingClick(View view) {
         Intent recordingActivity = new Intent(this, LoadExistingActivity.class);
         startActivity(recordingActivity);
     }
 
-    public void importAudioClick(View view){
+    public void importAudioClick(View view) {
         Intent recordingActivity = new Intent(this, RecordActivity.class);
     }
 }
