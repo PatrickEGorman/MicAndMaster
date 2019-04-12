@@ -30,12 +30,21 @@
         tools:context=".EditorActivity"
         tools:showIn="@layout/activity_editor">
 
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="33dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="38dp"
+            app:layout_constraintBottom_toTopOf="@+id/play"
+            app:layout_constraintStart_toEndOf="@+id/play" />
+
         <Button
             android:id="@+id/play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/play"
             android:onClick="playClick"
+            android:text="@string/play"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

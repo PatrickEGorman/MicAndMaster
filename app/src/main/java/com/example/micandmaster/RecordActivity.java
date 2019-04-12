@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -37,7 +39,7 @@ public class RecordActivity extends AppCompatActivity {
     private MediaRecorder mediaRecorder;
     private File file;
     private MediaPlayer mediaPlayer;
-    private Button playButton;
+    private Chronometer myChronometer;
     private LayoutInflater inflater;
     private View popupView;
     public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
@@ -51,6 +53,7 @@ public class RecordActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
         this.file = new File(path + "audio.aac");
+        this.myChronometer = (Chronometer)findViewById(R.id.chronometer);
     }
 
     public void recordClick(View view){
@@ -69,11 +72,14 @@ public class RecordActivity extends AppCompatActivity {
             catch(IOException E){
                 E.printStackTrace();
             }
+            myChronometer.setBase(SystemClock.elapsedRealtime());
+            myChronometer.start();
             mediaRecorder.start();
         }
 
         if(curText.equals("Stop")){
             ((TextView)view).setText("New Recording");
+            myChronometer.stop();
             mediaRecorder.stop();
             Button playButton = (Button) findViewById(R.id.play);
             playButton.setVisibility(View.VISIBLE);
@@ -85,13 +91,25 @@ public class RecordActivity extends AppCompatActivity {
     public void playClick(View view){
         mediaPlayer = new MediaPlayer();
         try {
+            myChronometer.setBase(SystemClock.elapsedRealtime());
             mediaPlayer.setDataSource(this.file.getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
+            myChronometer.start();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
+                @Override
+                public  void onCompletion(MediaPlayer mediaPlayer){
+                    stopChronometer();
+                }
+            });
         }
         catch(IOException e){
             e.printStackTrace();
         }
+    }
+
+    private void stopChronometer() {
+        this.myChronometer.stop();
     }
 
     public void saveClick(View view){

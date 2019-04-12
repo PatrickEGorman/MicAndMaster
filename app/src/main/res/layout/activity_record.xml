@@ -30,6 +30,16 @@
         tools:context=".RecordActivity"
         tools:showIn="@layout/activity_record">
 
+
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="33dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="38dp"
+            app:layout_constraintBottom_toTopOf="@+id/save"
+            app:layout_constraintStart_toEndOf="@+id/save" />
+
         <Button
             android:id="@+id/record"
             android:layout_width="wrap_content"
