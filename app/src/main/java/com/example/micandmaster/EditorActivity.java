@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Chronometer;
 
 import com.example.micandmaster.audio.Audio;
+import com.example.micandmaster.audio.WaveForm;
 import com.example.micandmaster.db.AudioEntity;
 import com.example.micandmaster.db.AudioViewModel;
 
@@ -37,12 +38,14 @@ public class EditorActivity extends AppCompatActivity {
             public void onChanged(AudioEntity audioEntity) {
                 Audio audio = new Audio(audioEntity.getName(), audioEntity.getPath());
                 setAudio(audio);
+
             }
         });
     }
 
     public void setAudio(Audio audio) {
         this.audio = audio;
+        generateWaveform();
     }
 
     public void playClick(View view) {
@@ -62,6 +65,10 @@ public class EditorActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void generateWaveform(){
+        WaveForm waveForm = new WaveForm(this.audio, this.getApplicationContext());
     }
 
     public void stopChronometer() {
