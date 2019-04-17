@@ -48,12 +48,14 @@ public class Audio {
 
     public void deleteAudio(Application application) {
         File audiOFile = new File(this.path);
-        audiOFile.delete();
+        if(audiOFile.delete()){
+            System.out.println(this.path + " deleted");
+        }
         AudioViewModel model = new AudioViewModel(application);
         model.deleteAudio(this);
     }
 
     public void generatePath(Context context) {
-        this.path = context.getFilesDir().getAbsolutePath() + name + ".aac";
+        this.path = context.getFilesDir().getAbsolutePath() + name + ".pcm";
     }
 }

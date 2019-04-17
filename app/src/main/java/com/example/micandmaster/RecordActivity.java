@@ -72,78 +72,6 @@ public class RecordActivity extends AppCompatActivity {
 
     }
 
-    public void recordClick(View view) {
-
-        String curText = (String) ((TextView) view).getText();
-
-        if (curText.equals("New Recording")) {
-            ((TextView) view).setText("Stop");
-
-
-            AudioRecord.Builder recordBuilder = new AudioRecord.Builder();
-            AudioFormat.Builder pcmBuilder = new AudioFormat.Builder();
-            pcmBuilder.setEncoding(AudioFormat.ENCODING_PCM_16BIT);
-            recordBuilder.setAudioFormat(pcmBuilder.build());
-            record = recordBuilder.build();
-            record.startRecording();
-            myChronometer.start();
-            isRecording = true;
-            recordingThread = new Thread(new RecordingRunnable(), "Recording Thread");
-            recordingThread.start();
-        }
-
-        if (curText.equals("Stop")) {
-            ((TextView) view).setText("New Recording");
-            myChronometer.stop();
-            isRecording = false;
-            record.stop();
-            record.release();
-            findViewById(R.id.play).setVisibility(View.VISIBLE);
-            record = null;
-            recordingThread = null;
-        }
-    }
-
-    private void writeAudioDataToFile() {
-        short sData[] = new short[1024];
-        FileOutputStream os;
-        try {
-            os = new FileOutputStream(file.getPath());
-
-        while (isRecording) {
-            // gets the voice output from microphone to byte format
-
-            record.read(sData, 0, 1024);
-            System.out.println("Short wirting to file" + sData.toString());
-            try {
-                // // writes the data to file from buffer
-                // // stores the voice buffer
-                byte bData[] = short2byte(sData);
-                os.write(bData, 0, 1024 * 2);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //convert short to byte
-    private byte[] short2byte(short[] sData) {
-        int shortArrsize = sData.length;
-        byte[] bytes = new byte[shortArrsize * 2];
-        for (int i = 0; i < shortArrsize; i++) {
-            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
-            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
-            sData[i] = 0;
-        }
-        return bytes;
-
-    }
-
-
     private void stopChronometer() {
         this.myChronometer.stop();
     }
@@ -178,12 +106,49 @@ public class RecordActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        else {
+            TextView indicator = findViewById(R.id.warningIndicator);
+            String text = "Name "+name+" already taken";
+            indicator.setText(text);
+        }
     }
 
     public File getFile() {
         return file;
     }
 
+    public void recordClick(View view) {
+
+        String curText = (String) ((TextView) view).getText();
+
+        if (curText.equals("New Recording")) {
+            ((TextView) view).setText("Stop");
+            int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
+                    AudioFormat.ENCODING_PCM_16BIT);
+            record = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, intSize);
+            record.startRecording();
+            myChronometer.setBase(SystemClock.elapsedRealtime());
+            myChronometer.start();
+            isRecording = true;
+            recordingThread = new Thread(new RecordingRunnable(), "Recording Thread");
+            recordingThread.start();
+            findViewById(R.id.play).setVisibility(View.INVISIBLE);
+            findViewById(R.id.save).setVisibility(View.INVISIBLE);
+        }
+
+        if (curText.equals("Stop")) {
+            ((TextView) view).setText("New Recording");
+            myChronometer.stop();
+            isRecording = false;
+            record.stop();
+            record.release();
+            findViewById(R.id.play).setVisibility(View.VISIBLE);
+            findViewById(R.id.save).setVisibility(View.VISIBLE);
+            record = null;
+            recordingThread = null;
+        }
+    }
 
     private class RecordingRunnable implements Runnable {
 
@@ -229,6 +194,12 @@ public class RecordActivity extends AppCompatActivity {
         audioPlayer = createAudioPlayer();
         myChronometer.setBase(SystemClock.elapsedRealtime());
         myChronometer.start();
+        try {
+            in = new FileInputStream(this.file);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         isPlay = true;
         audioPlayer.play();
         mThread = new Thread(new PlayerProcess());
@@ -260,6 +231,7 @@ public class RecordActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            bytesread = 0;
             while (bytesread < size && isPlay) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -284,9 +256,10 @@ public class RecordActivity extends AppCompatActivity {
                     audioPlayer.stop();
                     audioPlayer.release();
                     mThread = null;
-                    stopChronometer();
                 }
-            };
+                mThread = null;
+                stopChronometer();
+            }
         }
     }
 
