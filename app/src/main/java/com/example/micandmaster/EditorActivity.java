@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Chronometer;
 
@@ -78,7 +77,7 @@ public class EditorActivity extends AppCompatActivity {
         mThread.start();
     }
 
-    private AudioTrack createAudioPlayer(){
+    private AudioTrack createAudioPlayer() {
         int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT);
         AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
@@ -92,9 +91,10 @@ public class EditorActivity extends AppCompatActivity {
         }
 
         size = file.length();
-        return  audioTrack;
+        return audioTrack;
     }
-    private class PlayerProcess implements Runnable{
+
+    private class PlayerProcess implements Runnable {
 
         @Override
         public void run() {
@@ -110,7 +110,7 @@ public class EditorActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 if (ret != -1) { // Write the byte array to the track
-                    audioPlayer.write(byteData,0, ret);
+                    audioPlayer.write(byteData, 0, ret);
                     bytesread += ret;
                 } else break;
             }
@@ -119,8 +119,8 @@ public class EditorActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (audioPlayer!=null){
-                if (audioPlayer.getState()!=AudioTrack.PLAYSTATE_STOPPED){
+            if (audioPlayer != null) {
+                if (audioPlayer.getState() != AudioTrack.PLAYSTATE_STOPPED) {
                     audioPlayer.stop();
                     audioPlayer.release();
                     mThread = null;
@@ -131,7 +131,7 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
-    public void generateWaveform(){
+    public void generateWaveform() {
         WaveForm waveForm = new WaveForm(this.audio, this.getApplicationContext());
     }
 

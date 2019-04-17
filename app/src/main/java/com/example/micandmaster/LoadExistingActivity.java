@@ -26,7 +26,7 @@ public class LoadExistingActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_load_existing);
         AudioViewModel model = new AudioViewModel(getApplication());
-        LiveData<List<String>> names = model.names;
+        LiveData<List<String>> names = model.getAudioNames();
         names.observe(this, new Observer<List<String>>() {
             @Override
             public void onChanged(@Nullable List<String> names) {

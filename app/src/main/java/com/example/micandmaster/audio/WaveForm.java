@@ -9,7 +9,7 @@ public class WaveForm {
         System.loadLibrary("native-lib");
     }
 
-    public WaveForm(Audio audio, Context context){
+    public WaveForm(Audio audio, Context context) {
         mAudio = audio;
         mAudio.generatePath(context);
         System.out.println(array(mAudio.path)[2]);

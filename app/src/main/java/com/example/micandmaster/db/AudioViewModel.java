@@ -20,6 +20,10 @@ public class AudioViewModel extends AndroidViewModel {
         this.names = repository.getAudioNames();
     }
 
+    public LiveData<List<String>> getAudioNames() {
+        return this.names;
+    }
+
     public void insertAudio(Audio audio) {
         AudioEntity audioEntity = new AudioEntity(audio.name, audio.path);
         this.repository.insertAudio(audioEntity);

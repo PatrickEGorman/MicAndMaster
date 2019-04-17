@@ -1,15 +1,16 @@
 package com.example.micandmaster;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,7 +18,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.example.micandmaster.Util.FileUtilities;
 import com.example.micandmaster.audio.Audio;
+import com.example.micandmaster.db.AudioViewModel;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class RecordActivity extends AppCompatActivity {
 
@@ -54,7 +56,6 @@ public class RecordActivity extends AppCompatActivity {
     private int size;
     private int count = 512 * 1024;
     private Thread mThread;
-
 
 
     @Override
@@ -89,8 +90,25 @@ public class RecordActivity extends AppCompatActivity {
         View layout = RecordActivity.this.inflater.inflate(R.layout.activity_record,
                 (ViewGroup) this.findViewById(R.id.save_as_window));
         EditText nameInput = (EditText) this.popupView.findViewById(R.id.name_input);
-        String name = nameInput.getText().toString();
+        final String name = nameInput.getText().toString();
         Boolean isUnique = Audio.checkNameUnique(name, this);
+        AudioViewModel viewModel = new AudioViewModel(this.getApplication());
+        LiveData<List<String>> namesLiveData = viewModel.getAudioNames();
+        namesLiveData.observe(this, new Observer<List<String>>() {
+            @Override
+            public void onChanged(@Nullable List<String> names) {
+                saveFile(names, name);
+            }
+        });
+    }
+
+    public void saveFile(List<String> names, String name) {
+        boolean isUnique = true;
+        for (String audioName : names) {
+            if (name.equals(audioName)) {
+                isUnique = false;
+            }
+        }
         if (isUnique) {
             Audio audio = new Audio(name);
             audio.generatePath(this);
@@ -104,10 +122,9 @@ public class RecordActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
             TextView indicator = findViewById(R.id.warningIndicator);
-            String text = "Name "+name+" already taken";
+            String text = "Name " + name + " is already taken";
             indicator.setText(text);
         }
     }
@@ -204,7 +221,7 @@ public class RecordActivity extends AppCompatActivity {
         mThread.start();
     }
 
-    private AudioTrack createAudioPlayer(){
+    private AudioTrack createAudioPlayer() {
         int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT);
         AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
@@ -223,9 +240,10 @@ public class RecordActivity extends AppCompatActivity {
         }
 
         size = (int) file.length();
-        return  audioTrack;
+        return audioTrack;
     }
-    private class PlayerProcess implements Runnable{
+
+    private class PlayerProcess implements Runnable {
 
         @Override
         public void run() {
@@ -240,7 +258,7 @@ public class RecordActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 if (ret != -1) { // Write the byte array to the track
-                    audioPlayer.write(byteData,0, ret);
+                    audioPlayer.write(byteData, 0, ret);
                     bytesread += ret;
                 } else break;
             }
@@ -249,8 +267,8 @@ public class RecordActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            if (audioPlayer!=null){
-                if (audioPlayer.getState()!=AudioTrack.PLAYSTATE_STOPPED){
+            if (audioPlayer != null) {
+                if (audioPlayer.getState() != AudioTrack.PLAYSTATE_STOPPED) {
                     audioPlayer.stop();
                     audioPlayer.release();
                     mThread = null;
