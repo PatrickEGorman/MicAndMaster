@@ -43,7 +43,7 @@ public class RecordActivity extends AppCompatActivity {
     private LayoutInflater inflater;
     private View popupView;
     private Thread recordingThread = null;
-    private int bytesread = 0, ret = 0;
+    int ret = 0;
     private boolean isRecording;
     public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(44100,
@@ -53,7 +53,6 @@ public class RecordActivity extends AppCompatActivity {
     private FileInputStream in;
     private int size;
     private int count = 512 * 1024;
-    private boolean isPlay;
     private Thread mThread;
 
 
@@ -200,7 +199,6 @@ public class RecordActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        isPlay = true;
         audioPlayer.play();
         mThread = new Thread(new PlayerProcess());
         mThread.start();
@@ -231,8 +229,8 @@ public class RecordActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            bytesread = 0;
-            while (bytesread < size && isPlay) {
+            int bytesread = 0;
+            while (bytesread < size) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
                 }
