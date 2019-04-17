@@ -1,12 +1,18 @@
 package com.example.micandmaster;
 
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,17 +28,34 @@ import com.example.micandmaster.Util.FileUtilities;
 import com.example.micandmaster.audio.Audio;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class RecordActivity extends AppCompatActivity {
 
-    private MediaRecorder mediaRecorder;
+    private AudioRecord record;
     private File file;
-    private MediaPlayer mediaPlayer;
+    private AudioTrack audioPlayer;
     private Chronometer myChronometer;
     private LayoutInflater inflater;
     private View popupView;
+    private Thread recordingThread = null;
+    private int bytesread = 0, ret = 0;
+    private boolean isRecording;
     public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
+    private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(44100,
+            AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+    private AudioTrack track;
+    private byte[] byteData = null;
+    private FileInputStream in;
+    private int size;
+    private int count = 512 * 1024;
+    private boolean isPlay;
+    private Thread mThread;
+
 
 
     @Override
@@ -42,59 +65,84 @@ public class RecordActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
-        this.file = new File(path + "audio.aac");
+        this.file = new File(path + "audio.pcm");
         this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
+        track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
+                AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE, AudioTrack.MODE_STREAM);
+
     }
 
     public void recordClick(View view) {
+
         String curText = (String) ((TextView) view).getText();
 
         if (curText.equals("New Recording")) {
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-            mediaRecorder.setOutputFile(this.file.getAbsolutePath());
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            try {
-                mediaRecorder.prepare();
-                ((TextView) view).setText("Stop");
-            } catch (IOException E) {
-                E.printStackTrace();
-            }
-            myChronometer.setBase(SystemClock.elapsedRealtime());
+            ((TextView) view).setText("Stop");
+
+
+            AudioRecord.Builder recordBuilder = new AudioRecord.Builder();
+            AudioFormat.Builder pcmBuilder = new AudioFormat.Builder();
+            pcmBuilder.setEncoding(AudioFormat.ENCODING_PCM_16BIT);
+            recordBuilder.setAudioFormat(pcmBuilder.build());
+            record = recordBuilder.build();
+            record.startRecording();
             myChronometer.start();
-            mediaRecorder.start();
+            isRecording = true;
+            recordingThread = new Thread(new RecordingRunnable(), "Recording Thread");
+            recordingThread.start();
         }
 
         if (curText.equals("Stop")) {
             ((TextView) view).setText("New Recording");
             myChronometer.stop();
-            mediaRecorder.stop();
-            Button playButton = (Button) findViewById(R.id.play);
-            playButton.setVisibility(View.VISIBLE);
-            Button saveButton = (Button) findViewById(R.id.save);
-            saveButton.setVisibility(View.VISIBLE);
+            isRecording = false;
+            record.stop();
+            record.release();
+            findViewById(R.id.play).setVisibility(View.VISIBLE);
+            record = null;
+            recordingThread = null;
         }
     }
 
-    public void playClick(View view) {
-        mediaPlayer = new MediaPlayer();
+    private void writeAudioDataToFile() {
+        short sData[] = new short[1024];
+        FileOutputStream os;
         try {
-            myChronometer.setBase(SystemClock.elapsedRealtime());
-            mediaPlayer.setDataSource(this.file.getPath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            myChronometer.start();
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    stopChronometer();
-                }
-            });
+            os = new FileOutputStream(file.getPath());
+
+        while (isRecording) {
+            // gets the voice output from microphone to byte format
+
+            record.read(sData, 0, 1024);
+            System.out.println("Short wirting to file" + sData.toString());
+            try {
+                // // writes the data to file from buffer
+                // // stores the voice buffer
+                byte bData[] = short2byte(sData);
+                os.write(bData, 0, 1024 * 2);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+            os.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    //convert short to byte
+    private byte[] short2byte(short[] sData) {
+        int shortArrsize = sData.length;
+        byte[] bytes = new byte[shortArrsize * 2];
+        for (int i = 0; i < shortArrsize; i++) {
+            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            sData[i] = 0;
+        }
+        return bytes;
+
+    }
+
 
     private void stopChronometer() {
         this.myChronometer.stop();
@@ -131,4 +179,115 @@ public class RecordActivity extends AppCompatActivity {
             }
         }
     }
+
+    public File getFile() {
+        return file;
+    }
+
+
+    private class RecordingRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            final File file = getFile();
+            final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+
+            try (final FileOutputStream outStream = new FileOutputStream(file)) {
+                while (isRecording) {
+                    int result = record.read(buffer, BUFFER_SIZE);
+                    if (result < 0) {
+                        throw new RuntimeException("Reading of audio buffer failed: " +
+                                getBufferReadFailureReason(result));
+                    }
+                    outStream.write(buffer.array(), 0, BUFFER_SIZE);
+                    track.write(buffer.array(), 0, BUFFER_SIZE);
+                    buffer.clear();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Writing of recorded audio failed", e);
+            }
+        }
+
+        private String getBufferReadFailureReason(int errorCode) {
+            switch (errorCode) {
+                case AudioRecord.ERROR_INVALID_OPERATION:
+                    return "ERROR_INVALID_OPERATION";
+                case AudioRecord.ERROR_BAD_VALUE:
+                    return "ERROR_BAD_VALUE";
+                case AudioRecord.ERROR_DEAD_OBJECT:
+                    return "ERROR_DEAD_OBJECT";
+                case AudioRecord.ERROR:
+                    return "ERROR";
+                default:
+                    return "Unknown (" + errorCode + ")";
+            }
+        }
+    }
+
+
+    public void playClick(View view) {
+        audioPlayer = createAudioPlayer();
+        myChronometer.setBase(SystemClock.elapsedRealtime());
+        myChronometer.start();
+        isPlay = true;
+        audioPlayer.play();
+        mThread = new Thread(new PlayerProcess());
+        mThread.start();
+    }
+
+    private AudioTrack createAudioPlayer(){
+        int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
+                AudioFormat.ENCODING_PCM_16BIT);
+        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
+                AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
+        if (audioTrack == null) {
+            Log.d("TCAudio", "audio track is not initialised ");
+            return null;
+        }
+
+        byteData = new byte[(int) count];
+        try {
+            in = new FileInputStream(this.file);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        size = (int) file.length();
+        return  audioTrack;
+    }
+    private class PlayerProcess implements Runnable{
+
+        @Override
+        public void run() {
+            while (bytesread < size && isPlay) {
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+                try {
+                    ret = in.read(byteData, 0, count);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (ret != -1) { // Write the byte array to the track
+                    audioPlayer.write(byteData,0, ret);
+                    bytesread += ret;
+                } else break;
+            }
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (audioPlayer!=null){
+                if (audioPlayer.getState()!=AudioTrack.PLAYSTATE_STOPPED){
+                    audioPlayer.stop();
+                    audioPlayer.release();
+                    mThread = null;
+                    stopChronometer();
+                }
+            };
+        }
+    }
+
 }
