@@ -91,7 +91,6 @@ public class RecordActivity extends AppCompatActivity {
                 (ViewGroup) this.findViewById(R.id.save_as_window));
         EditText nameInput = (EditText) this.popupView.findViewById(R.id.name_input);
         final String name = nameInput.getText().toString();
-        Boolean isUnique = Audio.checkNameUnique(name, this);
         AudioViewModel viewModel = new AudioViewModel(this.getApplication());
         LiveData<List<String>> namesLiveData = viewModel.getAudioNames();
         namesLiveData.observe(this, new Observer<List<String>>() {
