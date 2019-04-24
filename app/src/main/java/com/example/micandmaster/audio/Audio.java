@@ -36,6 +36,6 @@ public class Audio {
     }
 
     public void generatePath(Context context) {
-        this.path = context.getFilesDir().getAbsolutePath() + name + ".pcm";
+        this.path = context.getFilesDir().getAbsolutePath() + "/" + name + ".pcm";
     }
 }

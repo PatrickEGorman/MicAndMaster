@@ -65,7 +65,7 @@ public class RecordActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
-        this.file = new File(path + "audio.pcm");
+        this.file = new File(path + "/audio.pcm");
         this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
         track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE, AudioTrack.MODE_STREAM);
