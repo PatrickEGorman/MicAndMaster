@@ -25,7 +25,6 @@ import java.io.IOException;
 
 public class EditorActivity extends AppCompatActivity {
     private Audio audio;
-    private MediaPlayer mediaPlayer;
     private Chronometer myChronometer;
     private AudioTrack audioPlayer;
     private Thread mThread;
@@ -33,7 +32,7 @@ public class EditorActivity extends AppCompatActivity {
     private File file;
     private byte[] byteData;
     private int count = 512 * 1024;
-    long size;
+    private long size;
 
 
     @Override
