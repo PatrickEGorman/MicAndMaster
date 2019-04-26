@@ -45,7 +45,6 @@ public class RecordActivity extends AppCompatActivity {
     private LayoutInflater inflater;
     private View popupView;
     private Thread recordingThread = null;
-    int ret = 0;
     private boolean isRecording;
     public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(44100,
@@ -65,7 +64,7 @@ public class RecordActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
-        this.file = new File(path + "/audio.pcm");
+        this.file = new File(path + "audio.pcm");
         this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
         track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE, AudioTrack.MODE_STREAM);
@@ -246,6 +245,7 @@ public class RecordActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            int ret = 0;
             int bytesread = 0;
             while (bytesread < size) {
                 if (Thread.currentThread().isInterrupted()) {

@@ -11,7 +11,6 @@ import java.io.IOException;
 public class WaveForm {
     private Audio mAudio;
     private FileInputStream in;
-    private Thread mThread;
     private long size;
     private byte[] byteData;
     private int[] values;
@@ -27,13 +26,11 @@ public class WaveForm {
         values = new int[numSamples];
         try {
             in = new FileInputStream(audioFile);
-            mThread = new Thread(new WaveformCalcProcess());
-            mThread.start();
         }
         catch (FileNotFoundException e){
             e.printStackTrace();
         }
-
+        values = getWaveFormData();
     }
 
     private int getAverage(byte[] audioBytes){
@@ -44,29 +41,23 @@ public class WaveForm {
         return total/numSamples;
     }
 
-    private class WaveformCalcProcess implements Runnable {
-
-        @Override
-        public void run() {
-            int ret = 0;
-            for (int n = 0; n < numSamples; n++) {
-                if (Thread.currentThread().isInterrupted()) {
-                    break;
-                }
-                try {
-                    in.read(byteData, 0, (int) size/numSamples);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                values[n] = getAverage(byteData);
-                System.out.println(values[n]);
-            }
+    public int[] getWaveFormData() {
+        int ret = 0;
+        int[] sampleAverage = new int[numSamples];
+        for (int n = 0; n < numSamples; n++) {
             try {
-                in.close();
+                in.read(byteData, 0, (int) size/numSamples);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            mThread = null;
+            sampleAverage[n] = getAverage(byteData);
+            System.out.println(sampleAverage[n]);
         }
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sampleAverage;
     }
 }
