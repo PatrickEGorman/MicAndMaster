@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="save_as_window" type="id"/>
+    <item name="save_as_window" type="id" />
 </resources>

@@ -1,15 +1,13 @@
 package com.example.micandmaster.audio;
 
-import android.content.Context;
-import android.media.AudioTrack;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class WaveForm {
-    private Audio mAudio;
+public class WaveFormCalc {
+    private String mPath;
     private FileInputStream in;
     private long size;
     private byte[] byteData;
@@ -17,28 +15,29 @@ public class WaveForm {
     private int numSamples = 256;
 
 
-    public WaveForm(Audio audio, Context context) {
-        mAudio = audio;
-        mAudio.generatePath(context);
-        File audioFile = new File(mAudio.path);
+    public WaveFormCalc(File audioFile) {
         size = audioFile.length();
-        byteData = new byte[(int) size/numSamples];
+        byteData = new byte[(int) size / numSamples];
         values = new int[numSamples];
         try {
             in = new FileInputStream(audioFile);
-        }
-        catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         values = getWaveFormData();
     }
 
-    private int getAverage(byte[] audioBytes){
+    private int getAverage(byte[] audioBytes) {
         int total = 0;
-        for(byte val: audioBytes){
-            total += (int) val;
+        for (byte val : audioBytes) {
+            if(val>0) {
+                total += (int) val;
+            }
+            if(val<0) {
+                total -= (int) val;
+            }
         }
-        return total/numSamples;
+        return total / audioBytes.length;
     }
 
     public int[] getWaveFormData() {
@@ -46,7 +45,7 @@ public class WaveForm {
         int[] sampleAverage = new int[numSamples];
         for (int n = 0; n < numSamples; n++) {
             try {
-                in.read(byteData, 0, (int) size/numSamples);
+                in.read(byteData, 0, (int) size / numSamples);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -59,5 +58,13 @@ public class WaveForm {
             e.printStackTrace();
         }
         return sampleAverage;
+    }
+
+    public int[] getValues() {
+        return values;
+    }
+
+    public void setValues(int[] values) {
+        this.values = values;
     }
 }

@@ -1,18 +1,19 @@
 package com.example.micandmaster;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.example.micandmaster.audio.WaveFormCalc;
+
+import java.io.File;
 
 
 public class WaveFormView extends View {
     private Paint paint;
+    private WaveFormCalc waveFormCalc;
 
     public WaveFormView(Context context) {
         super(context);
@@ -29,10 +30,17 @@ public class WaveFormView extends View {
         init();
     }
 
-    private void init(){
+    private void init() {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setColor(0xff101010);
+    }
+
+    public void drawWaveForm(File audioFile) {
+        WaveFormCalc waveCalc = new WaveFormCalc(audioFile);
+        for(int value : waveCalc.getValues()){
+            System.out.println(value);
+        }
     }
 
     @Override
@@ -43,6 +51,8 @@ public class WaveFormView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        int mode = MeasureSpec.getMode(widthMeasureSpec);
+//        int size = MeasureSpec.getSize(widthMeasureSpec);
 //        // Try for a width based on our minimum
 //        int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
 //        int w = resolveSizeAndState(minw, widthMeasureSpec, 1);

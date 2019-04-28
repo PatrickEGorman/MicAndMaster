@@ -36,7 +36,7 @@ public class LoadExistingActivity extends AppCompatActivity implements
     }
 
     protected void setList(List<String> names) {
-        Spinner spinner = (Spinner) findViewById(R.id.audio_selector);
+        Spinner spinner = findViewById(R.id.audio_selector);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, names);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

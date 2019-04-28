@@ -38,6 +38,9 @@ import java.util.List;
 
 public class RecordActivity extends AppCompatActivity {
 
+    public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
+    private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(44100,
+            AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
     private AudioRecord record;
     private File file;
     private AudioTrack audioPlayer;
@@ -46,9 +49,6 @@ public class RecordActivity extends AppCompatActivity {
     private View popupView;
     private Thread recordingThread = null;
     private boolean isRecording;
-    public static final String AUDIO_NAME = "com.example.micandmaster.AUDIO_NAME";
-    private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(44100,
-            AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
     private AudioTrack track;
     private byte[] byteData = null;
     private FileInputStream in;
@@ -65,7 +65,7 @@ public class RecordActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         String path = this.getFilesDir().getAbsolutePath();
         this.file = new File(path + "audio.pcm");
-        this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
+        this.myChronometer = findViewById(R.id.chronometer);
         track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE, AudioTrack.MODE_STREAM);
 
@@ -88,7 +88,7 @@ public class RecordActivity extends AppCompatActivity {
     public void savePopupClick(View view) {
         View layout = RecordActivity.this.inflater.inflate(R.layout.activity_record,
                 (ViewGroup) this.findViewById(R.id.save_as_window));
-        EditText nameInput = (EditText) this.popupView.findViewById(R.id.name_input);
+        EditText nameInput = this.popupView.findViewById(R.id.name_input);
         final String name = nameInput.getText().toString();
         AudioViewModel viewModel = new AudioViewModel(this.getApplication());
         LiveData<List<String>> namesLiveData = viewModel.getAudioNames();
@@ -164,6 +164,43 @@ public class RecordActivity extends AppCompatActivity {
         }
     }
 
+    public void playClick(View view) {
+        audioPlayer = createAudioPlayer();
+        myChronometer.setBase(SystemClock.elapsedRealtime());
+        myChronometer.start();
+        try {
+            in = new FileInputStream(this.file);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        audioPlayer.play();
+        mThread = new Thread(new PlayerProcess());
+        mThread.start();
+    }
+
+    private AudioTrack createAudioPlayer() {
+        int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
+                AudioFormat.ENCODING_PCM_16BIT);
+        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
+                AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
+        if (audioTrack == null) {
+            Log.d("TCAudio", "audio track is not initialised ");
+            return null;
+        }
+
+        byteData = new byte[count];
+        try {
+            in = new FileInputStream(this.file);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        size = (int) file.length();
+        return audioTrack;
+    }
+
     private class RecordingRunnable implements Runnable {
 
         @Override
@@ -201,44 +238,6 @@ public class RecordActivity extends AppCompatActivity {
                     return "Unknown (" + errorCode + ")";
             }
         }
-    }
-
-
-    public void playClick(View view) {
-        audioPlayer = createAudioPlayer();
-        myChronometer.setBase(SystemClock.elapsedRealtime());
-        myChronometer.start();
-        try {
-            in = new FileInputStream(this.file);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        audioPlayer.play();
-        mThread = new Thread(new PlayerProcess());
-        mThread.start();
-    }
-
-    private AudioTrack createAudioPlayer() {
-        int intSize = android.media.AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_STEREO,
-                AudioFormat.ENCODING_PCM_16BIT);
-        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
-                AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-        if (audioTrack == null) {
-            Log.d("TCAudio", "audio track is not initialised ");
-            return null;
-        }
-
-        byteData = new byte[(int) count];
-        try {
-            in = new FileInputStream(this.file);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        size = (int) file.length();
-        return audioTrack;
     }
 
     private class PlayerProcess implements Runnable {

@@ -7,8 +7,6 @@ import android.content.Context;
 
 @Database(entities = {AudioEntity.class}, version = 1)
 public abstract class AudioDatabase extends RoomDatabase {
-    public abstract AudioDao audioDao();
-
     private static volatile AudioDatabase INSTANCE;
 
     // Class is a singleton
@@ -24,4 +22,6 @@ public abstract class AudioDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
+
+    public abstract AudioDao audioDao();
 }

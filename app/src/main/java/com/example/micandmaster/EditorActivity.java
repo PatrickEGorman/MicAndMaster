@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +14,6 @@ import android.view.View;
 import android.widget.Chronometer;
 
 import com.example.micandmaster.audio.Audio;
-import com.example.micandmaster.audio.WaveForm;
 import com.example.micandmaster.db.AudioEntity;
 import com.example.micandmaster.db.AudioViewModel;
 
@@ -46,7 +44,7 @@ public class EditorActivity extends AppCompatActivity {
         String audioName = getIntent().getStringExtra(MainActivity.AUDIO_NAME);
         AudioViewModel model = new AudioViewModel(getApplication());
         MutableLiveData<AudioEntity> audioLiveData = model.findAudio(audioName);
-        this.myChronometer = (Chronometer) findViewById(R.id.chronometer);
+        this.myChronometer = findViewById(R.id.chronometer);
         audioLiveData.observe(this, new Observer<AudioEntity>() {
             @Override
             public void onChanged(AudioEntity audioEntity) {
@@ -83,7 +81,7 @@ public class EditorActivity extends AppCompatActivity {
                 AudioFormat.ENCODING_PCM_16BIT);
         AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, intSize, AudioTrack.MODE_STREAM);
-        byteData = new byte[(int) count];
+        byteData = new byte[count];
         try {
             in = new FileInputStream(this.file);
 
@@ -93,6 +91,15 @@ public class EditorActivity extends AppCompatActivity {
 
         size = file.length();
         return audioTrack;
+    }
+
+    public void generateWaveform() {
+        WaveFormView waveFormView = findViewById(R.id.waveFormView);
+        waveFormView.drawWaveForm(this.file);
+    }
+
+    public void stopChronometer() {
+        myChronometer.stop();
     }
 
     private class PlayerProcess implements Runnable {
@@ -130,14 +137,6 @@ public class EditorActivity extends AppCompatActivity {
                 stopChronometer();
             }
         }
-    }
-
-    public void generateWaveform() {
-        WaveForm waveForm = new WaveForm(this.audio, this.getApplicationContext());
-    }
-
-    public void stopChronometer() {
-        myChronometer.stop();
     }
 
 }

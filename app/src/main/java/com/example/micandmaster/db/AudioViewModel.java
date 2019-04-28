@@ -11,8 +11,8 @@ import java.util.List;
 
 public class AudioViewModel extends AndroidViewModel {
     public AudioRepository repository;
-    private MutableLiveData<String> searchResults;
     public LiveData<List<String>> names;
+    private MutableLiveData<String> searchResults;
 
     public AudioViewModel(Application application) {
         super(application);
